@@ -1,0 +1,61 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // https://github.com/google/protobuf-gradle-plugin
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
+    }
+}
+
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "2.0.0"
+    id "com.google.protobuf" version "0.8.7"
+}
+
+group 'com.beast.proto'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
+
+if (project.hasProperty('tag')) {
+    version = project.tag
+} else {
+    version = '0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'com.google.protobuf:protobuf-java:3.8.0'
+}
+
+protobuf {
+    protoc {
+        // https://mvnrepository.com/artifact/com.google.protobuf/protoc
+        artifact = 'com.google.protobuf:protoc:3.8.0'
+    }
+
+    generateProtoTasks {
+        // all() returns the collection of all protoc tasks
+        all().each { task ->
+            task.builtins {
+                java {}
+                cpp {}
+            }
+        }
+    }
+
+    // https://github.com/google/protobuf-gradle-plugin#intellij-idea
+    generatedFilesBaseDir = "$projectDir/gen"
+}
+
+clean {
+    delete protobuf.generatedFilesBaseDir
+}
+
+shadowJar.archiveName = "$project.name-$project.version-all.jar"
